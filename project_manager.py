@@ -1,4 +1,36 @@
 from database_schema import *
+import sqlite3
+
+def insert_new_project(data):
+    db = sqlite3.connect("project_manager.db")
+    cur = db.cursor()
+    cur.execute("""
+        INSERT INTO projects(
+            project_name,
+            project_description
+        )
+        VALUES(?,?)
+    """, 
+    data
+    )
+    db.commit()
+    print("Project stored!")
+    db.close()
+
+def add_project():
+    print("Add new project to database menu")
+    project_name = valid_string("project name")
+    project_description = valid_string("project description")
+    project_data = (project_name, project_description)
+    insert_new_project(project_data)
+
+def valid_string(action):
+    while True:
+        string = input(f"Insert {action}: ").strip()
+        if not string:
+            print(f"Provided {action} no valid. Please try again")
+        else:
+            return string
 
 def main():
     # Program goes here
@@ -21,7 +53,7 @@ def main():
             case '1':
                 print("Create new project")
                 create_database()
-                print("done")
+                add_project()
             case '2':
                 print("Show all projects")
             case '3':
