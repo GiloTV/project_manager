@@ -1,4 +1,4 @@
-from database_schema import *
+from database_schema import create_database
 import sqlite3
 
 def insert_new_project(data):
@@ -32,6 +32,22 @@ def valid_string(action):
         else:
             return string
 
+def show_projects():
+    db = sqlite3.connect("project_manager.db")
+    cur = db.cursor()
+    cur.execute("""
+        SELECT * FROM projects
+    """)
+    projects = cur.fetchall()
+    for project in projects:
+        project_id, project_name, project_description = project
+        print(f"""
+        {"-"*30}
+        Project {project_id} {project_name}
+        {project_description}
+        {"-"*30}""")
+    db.close()
+
 def main():
     # Program goes here
     while True:
@@ -56,6 +72,7 @@ def main():
                 add_project()
             case '2':
                 print("Show all projects")
+                show_projects()
             case '3':
                 print("Create new task")
             case '4':
