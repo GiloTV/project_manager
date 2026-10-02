@@ -1,14 +1,6 @@
 from database_schema import create_database
 from projects import add_project, show_projects
-import sqlite3
-
-def valid_string(action):
-    while True:
-        string = input(f"Insert {action}: ").strip()
-        if not string:
-            print(f"Provided {action} no valid. Please try again")
-        else:
-            return string
+from tasks import add_task
 
 def main():
     # Program goes here
@@ -37,6 +29,7 @@ def main():
                 show_projects()
             case '3':
                 print("Create new task")
+                add_task()
             case '4':
                 print("Show project task")
             case '5':

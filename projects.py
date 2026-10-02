@@ -1,5 +1,5 @@
 import sqlite3
-from project_manager import valid_string
+from validation import valid_string
 
 def add_project():
     print("Add new project to database menu")
