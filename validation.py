@@ -39,7 +39,7 @@ def valid_priority():
                 priority = 'High'
                 return priority
             case _:
-                priority("Select a valid priority!")
+                print("Select a valid priority!")
 
 def valid_project_id():
     db = sqlite3.connect("project_manager.db")

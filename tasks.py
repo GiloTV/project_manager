@@ -9,7 +9,7 @@ def add_task():
     task_name = valid_string("task name ")
     task_description = valid_string("task description ")
     task_created = str(date.today())
-    print("Insert the due date of this task in the following format YYYY-MM-")
+    print("Insert the due date of this task in the following format YYYY-MM-DD")
     due_date = valid_date()
     status = False
     priority = valid_priority()
@@ -19,6 +19,7 @@ def add_task():
 
 def insert_task(data):
     db = sqlite3.connect("project_manager.db")
+    db.execute("PRAGMA foreign_keys = ON")
     cur = db.cursor()
     cur.execute("""
         INSERT INTO tasks (
@@ -34,4 +35,91 @@ def insert_task(data):
     """, data)
     db.commit()
     print("Data saved!")
+    db.close()
+
+def show_single_project_tasks():
+    db = sqlite3.connect("project_manager.db")
+    cur = db.cursor()
+    while True:
+        project_id = valid_number("project id")
+        cur.execute("""
+                SELECT * FROM projects WHERE project_id = ?
+            """, (project_id,))
+        res = cur.fetchone()
+        if res:
+            cur.execute("""
+                SELECT
+                    projects.project_id,
+                    projects.project_name,
+                    tasks.task_id,
+                    tasks.task_name,
+                    tasks.task_description,
+                    tasks.due_date,
+                    tasks.status,
+                    tasks.priority
+                FROM projects
+                INNER JOIN tasks 
+                ON projects.project_id = tasks.project_id
+                WHERE projects.project_id = ?
+            """,(project_id,))
+            tasks = cur.fetchall()
+            if tasks:
+                for task in tasks:
+                    projct_id, project_name, task_id, task_name, task_description, due_date, task_status, priority = task
+                    print(f"""
+                        {'-'*30}
+                        project {projct_id}: {project_name}
+                        task {task_id}: {task_name}
+                        {'-'*30}
+                        description: {task_description}
+                        due: {due_date}
+                        status: {"Completed!" if task_status > '0' else "Pending..."}
+                        priority: {priority}
+                        {'-'*30}""")
+            elif not tasks:
+                print(f"No tasks yet for {res[1]}!")
+            break
+        else: 
+            print("Please select a valid project ID")
+    db.close()
+
+def show_all_projects_tasks():
+    db = sqlite3.connect("project_manager.db")
+    cur = db.cursor()
+    cur.execute("""
+        SELECT
+            projects.project_id,
+            projects.project_name,
+            tasks.task_id,
+            tasks.task_name,
+            tasks.task_description,
+            tasks.due_date,
+            tasks.status,
+            tasks.priority
+        FROM projects
+        LEFT JOIN tasks 
+        ON projects.project_id = tasks.project_id
+        ORDER BY projects.project_id
+    """)
+    tasks = cur.fetchall()
+    if tasks:
+        for task in tasks:
+            projct_id, project_name, task_id, task_name, task_description, due_date, task_status, priority = task
+            if task_name:
+                print(f"""
+                    {'-'*30}
+                    project {projct_id}: {project_name}
+                    task {task_id}: {task_name}
+                    {'-'*30}
+                    description: {task_description}
+                    due: {due_date}
+                    status: {"Completed!" if task_status > '0' else "Pending..."}
+                    priority: {priority}
+                    {'-'*30}""")
+            else:
+                print(f"""
+                    {'-'*30}
+                    project {projct_id}: {project_name}
+                    No tasks yet!
+                    {'-'*30}""")
     db.close()
