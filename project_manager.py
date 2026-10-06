@@ -1,6 +1,7 @@
 from database_schema import create_database
 from projects import add_project, show_projects
-from tasks import add_task, show_single_project_tasks, show_all_projects_tasks
+from tasks import add_task, show_single_project_tasks, show_all_projects_tasks, update_task_name
+from validation import fast_travel
 
 def main():
     # Program goes here
@@ -51,10 +52,35 @@ def main():
                             print("Returning to main menu...")
                         case _:
                             print("Select a valid option")
-                            
-
             case '5':
-                print("Update task")
+                while True:
+                    print("Update task menu.")
+                    update_task_opt = input(f"""
+                        {'*' * 30}
+                        1. Name
+                        2. Description
+                        3. Due Date
+                        4. Status
+                        5. Priority
+                        6. Back
+                        {'*' * 30}
+                        Option: """).strip()
+                    match update_task_opt:
+                        case '1':
+                            print("Update task selected!")  
+                            update_task_name()
+                            if fast_travel("updating tasks"):
+                                break                  
+                        case '2':
+                            print("Update description")  
+                        case '3':
+                            print("Update due date")  
+                        case '4':
+                            print("Update status")  
+                        case '5':
+                            print("Update priority")
+                        case '6':
+                            break
             case '6':
                 print("Delete task")
             case '7':

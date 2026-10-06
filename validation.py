@@ -53,18 +53,42 @@ def valid_project_id():
         id_list.append(existing_id[0])
 
     while True:
-        print("Which project will have a task added: ")
         project_id = valid_number("project id")
         if project_id in id_list:
             cur.execute("""
                 SELECT project_name from projects WHERE project_id = ?
             """, (project_id,))
             project_name = cur.fetchone()
-            print(f"New task will be added to project {project_name[0]}")
+            print(f"Project found! {project_name[0]}")
             db.close()
             return project_id
         else:
             print("No project found with that ID, try again!")
+
+def valid_task_id():
+    db = sqlite3.connect("project_manager.db")
+    cur = db.cursor()
+    cur.execute("""
+        SELECT task_id from tasks
+    """)
+    tasks_id = cur.fetchall()
+    id_list = []
+    for existing_id in tasks_id:
+        id_list.append(existing_id[0])
+
+    while True:
+        task_id = valid_number("task id")
+        if task_id in id_list:
+            cur.execute("""
+                SELECT task_id, task_name from tasks WHERE task_id = ?
+            """, (task_id,))
+            task = cur.fetchone()
+            print(f"Task found! {task[1]}")
+            db.close()
+            return task
+        #Maybe put here a cancelation
+        else:
+            print("No task found with that ID, try again!")
 
 def valid_date():
     while True:
@@ -73,8 +97,17 @@ def valid_date():
         day = valid_number("day")
         try:
             task_due_date = datetime.date(year,month, day)
-            print("value: ", task_due_date)
-            print("type: ", type(str(task_due_date)))
             return str(task_due_date)
         except ValueError as va:
             print("Value Error", va)
+
+def fast_travel(action):
+    while True:
+        confirmation = input(f"Would you like to continue {action}? Y | N\n -> ").strip().lower()
+        if confirmation in ["y", "yes"]:
+            return False
+        if confirmation in ["n", "no"]:
+            return True
+        else:
+            print("Select a valid option")
+
