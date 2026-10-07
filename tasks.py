@@ -124,23 +124,99 @@ def show_all_projects_tasks():
                     {'-'*30}""")
     db.close()
 
-def update_task_name():
-    project_id = valid_project_id()
-    task_id, task_name = valid_task_id()
-    new_task_name = input(f"Please type the new task name for {task_name} Or if you like to cancel type 'c' | 'cancel'\n -> ").strip()
+def update_name(project, task):
+    while True:
+        new_task_name = input(f"Please type the new task name for '{task[1]}' Or if you like to cancel type 'c' | 'cancel'\n -> ").strip()
+        if new_task_name in ["c", "cancel", "C", "CANCEL",]:
+            print("Action cancelled")
+            break
+        elif new_task_name:
+            db = sqlite3.connect("project_manager.db")
+            cur = db.cursor()
+            cur.execute("""
+                UPDATE tasks 
+                SET task_name = ? 
+                WHERE task_id = ? and project_id = ?
+            """, (new_task_name, task[0], project))
+            db.commit()
+            print("Task name updated")
+            db.close()
+            break     
+        else:
+            print("Invalid name. No empty values allowed")
+
+def update_description(project, task):
+    while True:
+        new_task_description = input(f"Please type the new description for {task[1]} Or if you like to cancel type 'c' | 'cancel'\n -> ").strip()
+        if new_task_description in ["c", "cancel", "C", "CANCEL", "n", "no"]:
+            print("Action cancelled")
+            break
+        elif new_task_description:
+            db = sqlite3.connect("project_manager.db")
+            cur = db.cursor()
+            cur.execute("""
+                UPDATE tasks 
+                SET task_description = ?
+                WHERE task_id = ? and project_id = ? 
+            """,(new_task_description, task[0], project))
+            db.commit()
+            print("Task description updated")
+            db.close()  
+            break
+        else:
+            print("Invalid name. No empty values allowed")
+
+def update_due_date(project, task):
+    print(f"Please type the new date for {task[1]}")
+    while True:
+        new_task_due_date = valid_date()
+        if new_task_due_date:
+            db = sqlite3.connect("project_manager.db")
+            cur = db.cursor()
+            cur.execute("""
+                    UPDATE tasks 
+                    SET due_date = ?
+                    WHERE task_id = ? and project_id = ? 
+                """,(new_task_due_date, task[0], project))
+            db.commit()
+            print("Task due date updated")
+            db.close()
+            break 
+        else: 
+            confirmation = input("No changes were made. Try again? 'Y' | 'N'\n -> ").strip().lower()
+            if confirmation in ["y", "yes"]:
+                print("Re type date please")
+            else:
+                print("Returning to previous menu")
+                break
+            
+def update_status(project, task):
     db = sqlite3.connect("project_manager.db")
     cur = db.cursor()
-    if new_task_name in ["c", "cancel", "C", "CANCEL"]:
-        print("Action cancelled")
-        db.close()
-    elif new_task_name:
-        cur.execute("""
+    cur.execute("""
+    SELECT status from tasks
+    WHERE task_id = ? and project_id = ?
+    """, (task[0], project))
+    current_status = cur.fetchone()
+    cur.execute("""
             UPDATE tasks 
-            SET task_name = ? 
-            WHERE task_id = ? and project_id = ?
-        """, (new_task_name, task_id, project_id))
-        db.commit()
-        print("Task name updated")
-        db.close()     
-    else:
-        print("Invalid name. No empty values allowed")
+            SET status = ?
+            WHERE task_id = ? and project_id = ? 
+        """,(1 if not current_status else 0, task[0], project))
+    db.commit()
+    print("Task status changed")
+    db.close()
+
+
+def update_priority(project, task):
+    new_task_priority = valid_priority()
+    db = sqlite3.connect("project_manager.db")
+    cur = db.cursor()
+    cur.execute("""
+                UPDATE tasks 
+                SET priority = ?
+                WHERE task_id = ? and project_id = ? 
+            """,(new_task_priority, task[0], project))
+    db.commit()
+    print(f"Task priority changed to {new_task_priority}")
+    db.close()  

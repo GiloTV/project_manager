@@ -51,19 +51,17 @@ def valid_project_id():
     id_list = []
     for existing_id in projects_id:
         id_list.append(existing_id[0])
-
-    while True:
-        project_id = valid_number("project id")
-        if project_id in id_list:
-            cur.execute("""
-                SELECT project_name from projects WHERE project_id = ?
-            """, (project_id,))
-            project_name = cur.fetchone()
-            print(f"Project found! {project_name[0]}")
-            db.close()
-            return project_id
-        else:
-            print("No project found with that ID, try again!")
+    project_id = valid_number("project id")
+    if project_id in id_list:
+        cur.execute("""
+            SELECT project_name from projects WHERE project_id = ?
+        """, (project_id,))
+        project_name = cur.fetchone()
+        print(f"Project found! {project_name[0]}")
+        db.close()
+        return project_id
+    else:
+        return False
 
 def valid_task_id():
     db = sqlite3.connect("project_manager.db")
@@ -75,20 +73,17 @@ def valid_task_id():
     id_list = []
     for existing_id in tasks_id:
         id_list.append(existing_id[0])
-
-    while True:
-        task_id = valid_number("task id")
-        if task_id in id_list:
-            cur.execute("""
-                SELECT task_id, task_name from tasks WHERE task_id = ?
-            """, (task_id,))
-            task = cur.fetchone()
-            print(f"Task found! {task[1]}")
-            db.close()
-            return task
-        #Maybe put here a cancelation
-        else:
-            print("No task found with that ID, try again!")
+    task_id = valid_number("task id")
+    if task_id in id_list:
+        cur.execute("""
+            SELECT task_id, task_name from tasks WHERE task_id = ?
+        """, (task_id,))
+        task = cur.fetchone()
+        print(f"Task found! {task[1]}")
+        db.close()
+        return task
+    else:
+        return False
 
 def valid_date():
     while True:
@@ -100,14 +95,14 @@ def valid_date():
             return str(task_due_date)
         except ValueError as va:
             print("Value Error", va)
-
+            return False
 def fast_travel(action):
     while True:
         confirmation = input(f"Would you like to continue {action}? Y | N\n -> ").strip().lower()
         if confirmation in ["y", "yes"]:
-            return False
-        if confirmation in ["n", "no"]:
             return True
+        if confirmation in ["n", "no"]:
+            return False
         else:
             print("Select a valid option")
 
