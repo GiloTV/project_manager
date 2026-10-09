@@ -41,61 +41,35 @@ def valid_priority():
             case _:
                 print("Select a valid priority!")
 
-def valid_project_id():
+def existing_project(project_id):
     db = sqlite3.connect("project_manager.db")
     cur = db.cursor()
     cur.execute("""
-        SELECT project_id from projects
-    """)
-    projects_id = cur.fetchall()
-    id_list = []
-    for existing_id in projects_id:
-        id_list.append(existing_id[0])
-    project_id = valid_number("project id")
-    if project_id in id_list:
-        cur.execute("""
-            SELECT project_name from projects WHERE project_id = ?
-        """, (project_id,))
-        project_name = cur.fetchone()
-        print(f"Project found! {project_name[0]}")
-        db.close()
-        return project_id
-    else:
-        return False
+        SELECT * from projects 
+        WHERE project_id = ?
+    """, (project_id,))
+    return cur.fetchone()
 
-def valid_task_id():
+def existing_task(task_id, project_id):
     db = sqlite3.connect("project_manager.db")
     cur = db.cursor()
     cur.execute("""
-        SELECT task_id from tasks
-    """)
-    tasks_id = cur.fetchall()
-    id_list = []
-    for existing_id in tasks_id:
-        id_list.append(existing_id[0])
-    task_id = valid_number("task id")
-    if task_id in id_list:
-        cur.execute("""
-            SELECT task_id, task_name from tasks WHERE task_id = ?
-        """, (task_id,))
-        task = cur.fetchone()
-        print(f"Task found! {task[1]}")
-        db.close()
-        return task
-    else:
-        return False
+        SELECT * from tasks 
+        WHERE task_id = ? AND project_id = ?
+    """, (task_id, project_id))
+    return cur.fetchone()
 
 def valid_date():
     while True:
-        year = valid_number("year")
-        month = valid_number("month")
-        day = valid_number("day")
         try:
-            task_due_date = datetime.date(year,month, day)
-            return str(task_due_date)
+            year = valid_number("year")
+            month = valid_number("month")
+            day = valid_number("day")
+            
+            return datetime.date(year, month, day).isoformat()
         except ValueError as va:
             print("Value Error", va)
-            return False
+            
 def fast_travel(action):
     while True:
         confirmation = input(f"Would you like to continue {action}? Y | N\n -> ").strip().lower()
