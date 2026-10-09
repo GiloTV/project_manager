@@ -1,21 +1,24 @@
 import sqlite3 
-from validation import valid_string, valid_number, valid_priority, valid_project_id, valid_task_id, valid_date
+from validation import valid_string, valid_number, valid_priority, valid_date, existing_project
 from projects import show_projects
 from datetime import date
 
 def add_task():
     show_projects()
-    project_id = valid_project_id()
-    task_name = valid_string("task name ")
-    task_description = valid_string("task description ")
-    task_created = str(date.today())
-    print("To add the due date add year, month and day automatically will be formatted in YYYY-MM-DD")
-    due_date = valid_date()
-    status = False
-    priority = valid_priority()
-    new_task = (task_name, task_description, task_created, due_date, status, priority, project_id)
-    print(new_task)
-    insert_task(new_task)
+    project_id = valid_number("project id")
+    if existing_project(project_id):
+        task_name = valid_string("task name ")
+        task_description = valid_string("task description ")
+        task_created = str(date.today())
+        print("To add the due date add year, month and day automatically will be formatted in YYYY-MM-DD")
+        due_date = valid_date()
+        status = False
+        priority = valid_priority()
+        new_task = (task_name, task_description, task_created, due_date, status, priority, project_id)
+        print(new_task)
+        insert_task(new_task)
+    else: 
+        print("No project was found. No new task created")
 
 def insert_task(data):
     db = sqlite3.connect("project_manager.db")
@@ -42,11 +45,7 @@ def show_single_project_tasks():
     cur = db.cursor()
     while True:
         project_id = valid_number("project id")
-        cur.execute("""
-                SELECT * FROM projects WHERE project_id = ?
-            """, (project_id,))
-        res = cur.fetchone()
-        if res:
+        if existing_project(project_id):
             cur.execute("""
                 SELECT
                     projects.project_id,
@@ -77,7 +76,7 @@ def show_single_project_tasks():
                         priority: {priority}
                         {'-'*30}""")
             elif not tasks:
-                print(f"No tasks yet for {res[1]}!")
+                print(f"No tasks yet for {project_id}!")
             break
         else: 
             print("Please select a valid project ID")
@@ -113,7 +112,7 @@ def show_all_projects_tasks():
                     {'-'*30}
                     description: {task_description}
                     due: {due_date}
-                    status: {"Completed!" if task_status > '0' else "Pending..."}
+                    status: {"Pending..." if '0' in task_status else "Completed"}
                     priority: {priority}
                     {'-'*30}""")
             else:
@@ -198,11 +197,12 @@ def update_status(project, task):
     WHERE task_id = ? and project_id = ?
     """, (task[0], project))
     current_status = cur.fetchone()
+    print(current_status)
     cur.execute("""
             UPDATE tasks 
             SET status = ?
             WHERE task_id = ? and project_id = ? 
-        """,(1 if not current_status else 0, task[0], project))
+        """,("1" if current_status[0] == "0" else "0", task[0], project))
     db.commit()
     print("Task status changed")
     db.close()
@@ -219,4 +219,25 @@ def update_priority(project, task):
             """,(new_task_priority, task[0], project))
     db.commit()
     print(f"Task priority changed to {new_task_priority}")
-    db.close()  
+    db.close()
+
+def delete_task(project, task):
+    db = sqlite3.connect("project_manager.db")
+    cur = db.cursor()
+    cur.execute("""
+        DELETE FROM tasks
+        WHERE task_id = ? AND project_id = ?
+    """,(task, project))
+    db.commit()
+    print(f"Task {task} from project {project} deleted successfully!")
+    db.close()
+
+def filter_by_priority(priority):
+    db = sqlite3.connect("project_manager.db")
+    cur = db.cursor()
+    cur.execute("""
+        SELECT * FROM tasks
+        WHERE priority = ?
+    """, (priority,))
+    task = cur.fetchall()
+    print(task)
