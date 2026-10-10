@@ -236,8 +236,68 @@ def filter_by_priority(priority):
     db = sqlite3.connect("project_manager.db")
     cur = db.cursor()
     cur.execute("""
-        SELECT * FROM tasks
+        SELECT
+            project_id,
+            task_id,
+            task_name,
+            task_description,
+            due_date,
+            priority 
+        FROM tasks
         WHERE priority = ?
     """, (priority,))
-    task = cur.fetchall()
-    print(task)
+    filtered = cur.fetchall()
+    filtered_tasks(filtered)
+    db.close()
+
+def filter_by_status(status):
+    db = sqlite3.connect("project_manager.db")
+    cur = db.cursor()
+    cur.execute("""
+        SELECT 
+            project_id,
+            task_id,
+            task_name,
+            task_description,
+            due_date,
+            priority 
+        FROM tasks
+        WHERE status = ?
+    """, ("1" if status else "0",))
+    filtered = cur.fetchall()
+    filtered_tasks(filtered)
+    db.close()
+
+def filter_by_date(date, flag):
+    db = sqlite3.connect("project_manager.db")
+    cur = db.cursor()
+    cur.execute(f"""
+        SELECT 
+            project_id,
+            task_id,
+            task_name,
+            task_description,
+            due_date,
+            priority 
+        FROM tasks
+        WHERE due_date {">" if flag else "<"} ? and status = ?
+    """,(date, "0"))
+    filtered = cur.fetchall()
+    filtered_tasks(filtered)
+    db.close()
+
+def filtered_tasks(tasks):
+    if tasks:
+        for task in tasks:
+            projct_id, task_id, task_name, task_desc, due_date, priority = task
+            print(f"""
+                {'-'*30}
+                project {projct_id}
+                task {task_id}: {task_name}
+                {'-'*30}
+                description: {task_desc}
+                due: {due_date}
+                priority: {priority}
+                {'-'*30}""")
+    else:
+        print(f"No tasks found!")

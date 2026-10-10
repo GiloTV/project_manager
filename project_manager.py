@@ -1,7 +1,8 @@
 from database_schema import create_database
 from projects import add_project, show_projects
-import tasks
 from validation import fast_travel, valid_number, existing_project, existing_task
+import datetime
+import tasks
 
 def main():
     
@@ -146,23 +147,23 @@ def main():
                             else:
                                 print("Choose a valid priority")                  
                         case '2':
-                            print("Update description") 
-                            tasks.update_description(project_id, task_id)
+                            print("Filter by completed") 
+                            tasks.filter_by_status(True)
                             if not fast_travel("updating tasks"):
                                 break  
                         case '3':
-                            print("Update due date") 
-                            tasks.update_due_date(project_id, task_id)
+                            print("Filter by pending...") 
+                            tasks.filter_by_status(False)
                             if not fast_travel("updating tasks"):
                                 break 
                         case '4':
-                            print("Update status")
-                            tasks.update_status(project_id, task_id)
+                            print("Filter by due time passed")
+                            tasks.filter_by_date(datetime.date.today(), False)
                             if not fast_travel("updating tasks"):
                                 break   
                         case '5':
-                            print("Update priority")
-                            tasks.update_priority(project_id, task_id)
+                            print("Filber by on time")
+                            tasks.filter_by_date(datetime.date.today(), True)
                             if not fast_travel("updating tasks"):
                                 break 
                         case '6':
