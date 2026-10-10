@@ -110,7 +110,7 @@ def main():
                     if existing_project(project_id):
                         task_id = valid_number("task id")
                         if existing_task(project_id, task_id):
-                            tasks.delete_task(project_id,)
+                            tasks.delete_task(project_id,task_id)
                             break
                         else:
                             tries += 1
@@ -118,7 +118,6 @@ def main():
                     else:
                         tries += 1
                         print(f"No project was found {3 - tries} tries left.")
-                    print("Too many unsuccessful tries going back")
             case '7':
                 print("Filter tasks")
                 while True:
@@ -149,22 +148,22 @@ def main():
                         case '2':
                             print("Filter by completed") 
                             tasks.filter_by_status(True)
-                            if not fast_travel("updating tasks"):
+                            if not fast_travel("filtering tasks"):
                                 break  
                         case '3':
                             print("Filter by pending...") 
                             tasks.filter_by_status(False)
-                            if not fast_travel("updating tasks"):
+                            if not fast_travel("filtering tasks"):
                                 break 
                         case '4':
                             print("Filter by due time passed")
                             tasks.filter_by_date(datetime.date.today(), False)
-                            if not fast_travel("updating tasks"):
+                            if not fast_travel("filtering tasks"):
                                 break   
                         case '5':
                             print("Filber by on time")
                             tasks.filter_by_date(datetime.date.today(), True)
-                            if not fast_travel("updating tasks"):
+                            if not fast_travel("filtering tasks"):
                                 break 
                         case '6':
                             break

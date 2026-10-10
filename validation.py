@@ -48,16 +48,21 @@ def existing_project(project_id):
         SELECT * from projects 
         WHERE project_id = ?
     """, (project_id,))
-    return cur.fetchone()
+    res = cur.fetchone()
+    db.close()
+    return res
 
-def existing_task(task_id, project_id):
+def existing_task(project_id, task_id):
     db = sqlite3.connect("project_manager.db")
     cur = db.cursor()
     cur.execute("""
         SELECT * from tasks 
         WHERE task_id = ? AND project_id = ?
     """, (task_id, project_id))
-    return cur.fetchone()
+    res = cur.fetchone()
+    db.close()
+    return res 
+
 
 def valid_date():
     while True:
